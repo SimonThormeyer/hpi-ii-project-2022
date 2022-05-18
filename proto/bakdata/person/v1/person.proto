@@ -1,0 +1,14 @@
+
+syntax = "proto3";
+
+package bakdata.person.v1;
+
+message Person {
+  string title = 1;
+  string firstName = 2;
+  string lastName = 3;
+  string orgIdentificationCode = 4;
+  string orgName = 5;
+  string accreditationStartDate = 6;
+  string accreditationEndDate = 7;
+}

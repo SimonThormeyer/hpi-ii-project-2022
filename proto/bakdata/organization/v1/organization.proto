@@ -1,0 +1,86 @@
+syntax = "proto3";
+
+package bakdata.organization.proto;
+
+message Organization {
+  string identificationCode = 1;
+  string registrationDate = 2;
+  string lastUpdateDate = 3;
+  string name = 4;
+  string acronym = 5;
+  string entityForm = 6;
+  string webSiteURL = 7;
+  string registrationCategory = 8;
+  Office headOffice = 9;
+  Office euOffice = 10;
+  string goals = 11;
+  repeated string levelsOfInterest = 12;
+  repeated string EULegislativeProposals = 13;
+  string EUSupportedForumsAndPlatforms = 14;
+  repeated string communicationActivities = 15;
+  string interOrUnofficalGroupings = 16;
+  MemberInfo memberInfo = 17;
+  string EPAccreditedNumber = 18;
+  repeated string interests = 19;
+  Structure structure = 20;
+  string interestRepresented = 21;
+
+}
+
+message Office {
+    string address = 1;
+    string postCode = 2;
+    string city = 3;
+    string country = 4;
+    Phone phone = 5;
+}
+
+message Phone {
+  string indicPhone = 1;
+  string phoneNumber = 2;
+}
+
+message MemberInfo {
+  int32 members100Percent = 1;
+  int32 members = 2;
+  int32 membersFTE = 3;
+  string infoMembers = 4;
+}
+
+message Structure {
+  string isMemberOf = 1;
+  repeated string organisationMembers = 2;
+}
+
+message FinancialData {
+  bool newOrganisation = 1;
+  ClosedYear closedYear = 2;
+  CurrentYear currentYear = 3;
+}
+
+message ClosedYear {
+  string startDate = 1;
+  string endDate = 2;
+  string intermediaries = 3;
+  Costs costs = 4;
+
+}
+
+message Costs {
+  Range range = 1;
+  string currency = 2;
+}
+
+message Range {
+  double min = 1;
+  double max = 2;
+}
+
+message Grants {
+  string source = 1;
+  double amount = 2;
+}
+
+message CurrentYear {
+  string intermediaries = 1;
+}
