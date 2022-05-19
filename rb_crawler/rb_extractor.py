@@ -66,17 +66,17 @@ class RbExtractor:
         corporate.event_type = "create"
         corporate.information = raw_text
         corporate.status = Status.STATUS_ACTIVE
-        self.producer.produce_to_topic(corporate=corporate)
+        self.producer.produce_to_topic(message=corporate)
 
     def handle_changes(self, corporate: Corporate, raw_text: str):
         log.debug(f"Changes are made to company: {corporate.id}")
         corporate.event_type = "update"
         corporate.status = Status.STATUS_ACTIVE
         corporate.information = raw_text
-        self.producer.produce_to_topic(corporate=corporate)
+        self.producer.produce_to_topic(message=corporate)
 
     def handle_deletes(self, corporate: Corporate):
         log.debug(f"Company {corporate.id} is inactive")
         corporate.event_type = "delete"
         corporate.status = Status.STATUS_INACTIVE
-        self.producer.produce_to_topic(corporate=corporate)
+        self.producer.produce_to_topic(message=corporate)
