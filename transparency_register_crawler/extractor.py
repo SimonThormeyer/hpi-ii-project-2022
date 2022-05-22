@@ -5,6 +5,8 @@ from typing import List
 from urllib.request import Request, urlopen
 from pathlib import Path
 
+import xmltodict
+
 from build.gen.bakdata.person.v1.person_pb2 import Person  # type: ignore
 from build.gen.bakdata.organization.v1.organization_pb2 import Organization  # type: ignore
 from transparency_register_crawler.organization_producer import TransRegOrganizationProducer
@@ -62,15 +64,25 @@ class TransparencyRegisterExtractor:
         for v in TransparencyRegisterExtractor.dataset_mapping.values():
             self.download_data_set(v["url"], v["file_name"])
 
-        # Todo: parse downloaded data into objects for Organization and Person
-        persons: List[Person] = []
+        persons: List[Person] = self.parse_persons()
+        organizations: List[Organization] = self.parse_organizations()
+
         for person in persons:
             self.person_producer.produce_to_topic(person)
 
-        organizations: List[Organization] = []
         for organization in organizations:
             self.person_producer.produce_to_topic(organization)
 
+    @staticmethod
+    def xml_to_dict(key: str):
+        file_name = TransparencyRegisterExtractor.dataset_mapping[key]["file_name"]
+        xml = open(Path(TransparencyRegisterExtractor.RAW_DATA_PATH) / file_name, "r", encoding="utf-8")
+        return xmltodict.parse(xml.read())
 
+    def parse_persons(self) -> List[Person]:
+        persons_dict = self.xml_to_dict("person")
+        return [Person(**entry) for entry in persons_dict["ListOfAccreditedPerson"]["resultList"]["accreditedPerson"]]
 
-
+    def parse_organizations(self) -> List[Organization]:
+        organizations_dict = self.xml_to_dict("organization")
+        return [Organization(**entry) for entry in organizations_dict['ListOfIRPublicDetail']["resultList"]['interestRepresentative']]
