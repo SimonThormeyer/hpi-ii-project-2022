@@ -6,6 +6,9 @@ from pathlib import Path
 
 from build.gen.bakdata.corporate.v1.corporate_pb2 import Person  # type: ignore
 from build.gen.bakdata.corporate.v1.corporate_pb2 import Organization  # type: ignore
+from transparency_register_crawler.organization_producer import TransRegOrganizationProducer
+from transparency_register_crawler.person_producer import TransRegPersonProducer
+
 log = logging.getLogger(__name__)
 
 
@@ -30,8 +33,8 @@ class TransparencyRegisterExtractor:
     ORGANIZATION_URL = DOWNLOAD_URL + ORGANIZATION_FILE_TYPE
 
     def __init__(self, file_path):
-        pass
-        # todo : self.producer = Producer()
+        self.organization_producer = TransRegOrganizationProducer()
+        self.person_producer = TransRegPersonProducer()
 
     @staticmethod
     def download_data_set(url, filename):
