@@ -1,6 +1,7 @@
 import logging
 import os
 from shutil import copyfileobj
+from typing import List
 from urllib.request import Request, urlopen
 from pathlib import Path
 
@@ -59,6 +60,15 @@ class TransparencyRegisterExtractor:
         for v in TransparencyRegisterExtractor.dataset_mapping.values():
             self.download_data_set(v["url"], v["filename"])
 
+
+        # Todo: parse downloaded data into objects for Organization and Person
+        persons: List[Person] = []
+        for person in persons:
+            self.person_producer.produce_to_topic(person)
+
+        organizations: List[Organization] = []
+        for organization in organizations:
+            self.person_producer.produce_to_topic(organization)
 
 
 
