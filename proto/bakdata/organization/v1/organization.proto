@@ -6,13 +6,13 @@ message Organization {
   string identificationCode = 1;
   string registrationDate = 2;
   string lastUpdateDate = 3;
-  string name = 4;
+  Name name = 4;
   string acronym = 5;
   string entityForm = 6;
   string webSiteURL = 7;
   string registrationCategory = 8;
   Office headOffice = 9;
-  Office euOffice = 10;
+  Office EUOffice = 10;
   string goals = 11;
   repeated string levelsOfInterest = 12;
   repeated string EULegislativeProposals = 13;
@@ -26,7 +26,9 @@ message Organization {
   string interestRepresented = 21;
 
 }
-
+message Name {
+  string originalName = 1;
+}
 message Office {
     string address = 1;
     string postCode = 2;
