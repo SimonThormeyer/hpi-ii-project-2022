@@ -119,7 +119,7 @@ class TransparencyRegisterExtractor:
         nested_alter(organizations_dict, "clients", TransparencyRegisterExtractor.forward_list_layer, in_place=True)
 
         nested_alter(organizations_dict, "grants",
-                                          TransparencyRegisterExtractor.forward_list_layer, in_place=True)
+                                          TransparencyRegisterExtractor.forward_dict_layer, in_place=True)
 
         nested_alter(organizations_dict, "min",
                                           lambda value: TransparencyRegisterExtractor.string_to_type(value, float), in_place=True)
@@ -128,6 +128,9 @@ class TransparencyRegisterExtractor:
 
         nested_alter(organizations_dict, "costs",
                      lambda value: TransparencyRegisterExtractor.rename_child_key(value, "@currency", "currency"), in_place=True)
+        nested_alter(organizations_dict, "totalAnnualRevenue",
+                     lambda value: TransparencyRegisterExtractor.rename_child_key(value, "@currency", "currency"),
+                     in_place=True)
 
         nested_delete(organizations_dict, "@xmlns:xsi", in_place=True)
         nested_delete(organizations_dict, "@xsi:type", in_place=True)
@@ -147,6 +150,14 @@ class TransparencyRegisterExtractor:
             result = list(value.values())[0]
             result = result if type(result) == list else [result]
             return result
+        return value
+
+    @staticmethod
+    def forward_dict_layer(value: dict):
+        if type(value) == dict:
+            values = list(value.values())
+            if type(values[0]) == dict:
+                return list(value.values())[0]
         return value
 
     @staticmethod
