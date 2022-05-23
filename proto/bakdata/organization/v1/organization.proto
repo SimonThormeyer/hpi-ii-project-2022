@@ -40,7 +40,7 @@ message Phone {
 }
 
 message MemberInfo {
-  int32 members100Percent = 1;
+  optional int32 members100Percent = 1;
   int32 members = 2;
   int32 membersFTE = 3;
   string infoMembers = 4;
