@@ -48,6 +48,8 @@ message MemberInfo {
   int32 membersFTE = 3;
   string infoMembers = 4;
   optional int32 members50Percent = 5;
+  optional int32 members25Percent = 6;
+  optional int32 members75Percent = 7;
 }
 
 message Structure {
@@ -59,6 +61,7 @@ message FinancialData {
   bool newOrganisation = 1;
   ClosedYear closedYear = 2;
   CurrentYear currentYear = 3;
+  optional string complementaryInformation = 4;
 }
 
 message ClosedYear {
@@ -68,12 +71,13 @@ message ClosedYear {
   optional Costs costs = 4;
   Grants grants = 5;
   repeated Client clients = 6;
+  optional Costs totalAnnualRevenue = 7;
 }
 
 message Client {
   string name = 1;
-  Revenue revenue = 2;
-  string proposal = 3;
+  optional Revenue revenue = 2;
+  optional string proposal = 3;
 }
 message Revenue {
   Range range = 1;
@@ -85,7 +89,7 @@ message Costs {
 
 message Range {
   double min = 1;
-  double max = 2;
+  optional double max = 2;
 }
 
 message Grants {
@@ -99,4 +103,5 @@ message Amount {
 
 message CurrentYear {
   string intermediaries = 1;
+  repeated Client clients = 2;
 }

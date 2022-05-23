@@ -104,8 +104,12 @@ class TransparencyRegisterExtractor:
         nested_alter(organizations_dict, "membersFTE", TransparencyRegisterExtractor.decimal_string_to_int, in_place=True)
         nested_alter(organizations_dict, "members100Percent",
                                           lambda value: TransparencyRegisterExtractor.string_to_type(value, int), in_place=True)
+        nested_alter(organizations_dict, "members75Percent",
+                     lambda value: TransparencyRegisterExtractor.string_to_type(value, int), in_place=True)
         nested_alter(organizations_dict, "members50Percent",
                                           lambda value: TransparencyRegisterExtractor.string_to_type(value, int), in_place=True)
+        nested_alter(organizations_dict, "members25Percent",
+                     lambda value: TransparencyRegisterExtractor.string_to_type(value, int), in_place=True)
         nested_alter(organizations_dict, "newOrganisation",
                                           lambda value: TransparencyRegisterExtractor.string_to_type(value, bool), in_place=True)
         nested_alter(organizations_dict, "absoluteCost",
@@ -137,11 +141,12 @@ class TransparencyRegisterExtractor:
             return value
         return value
 
-
     @staticmethod
     def forward_list_layer(value: dict):
         if type(value) == dict:
-            return list(value.values())[0]
+            result = list(value.values())[0]
+            result = result if type(result) == list else [result]
+            return result
         return value
 
     @staticmethod
