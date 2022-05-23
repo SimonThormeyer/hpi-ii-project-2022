@@ -1,12 +1,13 @@
 import logging
 import os
 from shutil import copyfileobj
-from typing import List, Dict, Any
+from typing import List, Dict, Any, Type
 from urllib.request import Request, urlopen
 from pathlib import Path
 from nested_lookup import nested_alter, nested_delete
 
 import xmltodict
+from tqdm import tqdm
 
 from build.gen.bakdata.person.v1.person_pb2 import Person  # type: ignore
 from build.gen.bakdata.organization.v1.organization_pb2 import Organization  # type: ignore
@@ -14,6 +15,7 @@ from transparency_register_crawler.organization_producer import TransRegOrganiza
 from transparency_register_crawler.person_producer import TransRegPersonProducer
 
 log = logging.getLogger(__name__)
+
 
 
 class TransparencyRegisterExtractor:
@@ -98,37 +100,49 @@ class TransparencyRegisterExtractor:
         return organizations
 
     @staticmethod
-    def cast_datatypes(interest_representative: Dict[str, Any]):
-        interest_representative['name'] = interest_representative['name']["originalName"]
-        if 'members100Percent' in interest_representative['members']:
-            interest_representative['members']['members100Percent'] = int(
-                interest_representative['members']['members100Percent']
-            )
-        if 'members50Percent' in interest_representative['members']:
-            interest_representative['members']['members50Percent'] = int(
-                interest_representative['members']['members50Percent']
-            )
-        interest_representative['members']['members'] = int(float(
-            interest_representative['members']['members']))
+    def cast_datatypes_for_real(organizations_dict):
+        nested_alter(organizations_dict, "membersFTE", TransparencyRegisterExtractor.decimal_string_to_int, in_place=True)
+        nested_alter(organizations_dict, "members100Percent",
+                                          lambda value: TransparencyRegisterExtractor.string_to_type(value, int), in_place=True)
+        nested_alter(organizations_dict, "members50Percent",
+                                          lambda value: TransparencyRegisterExtractor.string_to_type(value, int), in_place=True)
+        nested_alter(organizations_dict, "newOrganisation",
+                                          lambda value: TransparencyRegisterExtractor.string_to_type(value, bool), in_place=True)
+        nested_alter(organizations_dict, "absoluteCost",
+                                          lambda value: TransparencyRegisterExtractor.string_to_type(value, float), in_place=True)
+        nested_alter(organizations_dict, "members", TransparencyRegisterExtractor.decimal_string_to_int, in_place=True)
 
-        interest_representative['members']['membersFTE'] = int(float(
-            interest_representative['members']['membersFTE']))
+        nested_alter(organizations_dict, "clients", TransparencyRegisterExtractor.forward_list_layer, in_place=True)
 
-        interest_representative["financialData"]["newOrganisation"] = bool(
-            interest_representative["financialData"]["newOrganisation"])
+        nested_alter(organizations_dict, "grants",
+                                          TransparencyRegisterExtractor.forward_list_layer, in_place=True)
 
-        closed_year = interest_representative["financialData"]["closedYear"]
+        nested_alter(organizations_dict, "min",
+                                          lambda value: TransparencyRegisterExtractor.string_to_type(value, float), in_place=True)
+        nested_alter(organizations_dict, "max",
+                                          lambda value: TransparencyRegisterExtractor.string_to_type(value, float), in_place=True)
 
-        if 'costs' in closed_year:
-            closed_year['costs']['range']['min'] = float(
-                closed_year['costs']['range']['min'])
+        nested_alter(organizations_dict, "costs",
+                     lambda value: TransparencyRegisterExtractor.rename_child_key(value, "@currency", "currency"), in_place=True)
 
-            closed_year['costs']['range']['max'] = float(
-                closed_year['costs']['range']['max'])
-        if 'grants' in closed_year:
-            closed_year['grants']["grant"]["amount"]["absoluteCost"] = float(
-                closed_year['grants']["grant"]["amount"]["absoluteCost"])
-            closed_year['grants'] = closed_year['grants']["grant"]
+        nested_delete(organizations_dict, "@xmlns:xsi", in_place=True)
+        nested_delete(organizations_dict, "@xsi:type", in_place=True)
+
+    @staticmethod
+    def rename_child_key(value: dict, old_key: str, new_key: str):
+        if type(value) == dict and old_key in value:
+            assert new_key not in value
+            value[new_key] = value[old_key]
+            value.pop(old_key)
+            return value
+        return value
+
+
+    @staticmethod
+    def forward_list_layer(value: dict):
+        if type(value) == dict:
+            return list(value.values())[0]
+        return value
 
     @staticmethod
     def decimal_string_to_int(value: str):
