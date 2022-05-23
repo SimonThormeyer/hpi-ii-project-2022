@@ -6,7 +6,7 @@ message Organization {
   string identificationCode = 1;
   string registrationDate = 2;
   string lastUpdateDate = 3;
-  Name name = 4;
+  string name = 4;
   string acronym = 5;
   string entityForm = 6;
   string webSiteURL = 7;
@@ -19,15 +19,12 @@ message Organization {
   string EUSupportedForumsAndPlatforms = 14;
   repeated string communicationActivities = 15;
   string interOrUnofficalGroupings = 16;
-  MemberInfo memberInfo = 17;
+  MemberInfo members = 17;
   string EPAccreditedNumber = 18;
   repeated string interests = 19;
   Structure structure = 20;
   string interestRepresented = 21;
-
-}
-message Name {
-  string originalName = 1;
+  FinancialData financialData = 22;
 }
 message Office {
     string address = 1;
@@ -47,6 +44,7 @@ message MemberInfo {
   int32 members = 2;
   int32 membersFTE = 3;
   string infoMembers = 4;
+  optional int32 members50Percent = 5;
 }
 
 message Structure {
@@ -64,10 +62,19 @@ message ClosedYear {
   string startDate = 1;
   string endDate = 2;
   string intermediaries = 3;
-  Costs costs = 4;
-
+  optional Costs costs = 4;
+  Grants grants = 5;
+  repeated Client clients = 6;
 }
 
+message Client {
+  string name = 1;
+  Revenue revenue = 2;
+  string proposal = 3;
+}
+message Revenue {
+  Range range = 1;
+}
 message Costs {
   Range range = 1;
   string currency = 2;
@@ -80,7 +87,11 @@ message Range {
 
 message Grants {
   string source = 1;
-  double amount = 2;
+  Amount amount = 2;
+}
+
+message Amount {
+  double absoluteCost = 1;
 }
 
 message CurrentYear {

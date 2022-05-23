@@ -1,7 +1,7 @@
 import logging
 import os
 from shutil import copyfileobj
-from typing import List
+from typing import List, Dict, Any
 from urllib.request import Request, urlopen
 from pathlib import Path
 
@@ -71,7 +71,7 @@ class TransparencyRegisterExtractor:
             self.person_producer.produce_to_topic(person)
 
         for organization in organizations:
-            self.person_producer.produce_to_topic(organization)
+            self.organization_producer.produce_to_topic(organization)
 
     @staticmethod
     def xml_to_dict(key: str):
@@ -81,8 +81,77 @@ class TransparencyRegisterExtractor:
 
     def parse_persons(self) -> List[Person]:
         persons_dict = self.xml_to_dict("person")
-        return [Person(**entry) for entry in persons_dict["ListOfAccreditedPerson"]["resultList"]["accreditedPerson"]]
+        return [Person(**accreditedPerson) for accreditedPerson in
+                persons_dict["ListOfAccreditedPerson"]["resultList"]["accreditedPerson"]]
 
     def parse_organizations(self) -> List[Organization]:
         organizations_dict = self.xml_to_dict("organization")
-        return [Organization(**entry) for entry in organizations_dict['ListOfIRPublicDetail']["resultList"]['interestRepresentative']]
+        organizations = []
+        for interestRepresentative in organizations_dict['ListOfIRPublicDetail']["resultList"][
+            'interestRepresentative']:
+            TransparencyRegisterExtractor.unused_data(interestRepresentative)
+            TransparencyRegisterExtractor.cast_datatypes(interestRepresentative)
+
+            org = Organization(**interestRepresentative)
+            organizations.append(org)
+        return organizations
+
+    @staticmethod
+    def cast_datatypes(interest_representative: Dict[str, Any]):
+        interest_representative['name'] = interest_representative['name']["originalName"]
+        if 'members100Percent' in interest_representative['members']:
+            interest_representative['members']['members100Percent'] = int(
+                interest_representative['members']['members100Percent']
+            )
+        if 'members50Percent' in interest_representative['members']:
+            interest_representative['members']['members50Percent'] = int(
+                interest_representative['members']['members50Percent']
+            )
+        interest_representative['members']['members'] = int(float(
+            interest_representative['members']['members']))
+
+        interest_representative['members']['membersFTE'] = int(float(
+            interest_representative['members']['membersFTE']))
+
+        interest_representative["financialData"]["newOrganisation"] = bool(
+            interest_representative["financialData"]["newOrganisation"])
+
+        closed_year = interest_representative["financialData"]["closedYear"]
+
+        if 'costs' in closed_year:
+            closed_year['costs']['range']['min'] = float(
+                closed_year['costs']['range']['min'])
+
+            closed_year['costs']['range']['max'] = float(
+                closed_year['costs']['range']['max'])
+        if 'grants' in closed_year:
+            closed_year['grants']["grant"]["amount"]["absoluteCost"] = float(
+                closed_year['grants']["grant"]["amount"]["absoluteCost"])
+            closed_year['grants'] = closed_year['grants']["grant"]
+
+        if 'clients' in closed_year:
+            closed_year['clients'] = closed_year['clients']['client']
+
+    @staticmethod
+    def remove_xml_schema_data(data: dict):
+        data.pop("@xmlns:xsi", None)
+        data.pop("@xsi:type", None)
+
+    @staticmethod
+    def unused_data(interest_representative):
+        TransparencyRegisterExtractor.remove_xml_schema_data(interest_representative["structure"])
+        TransparencyRegisterExtractor.remove_xml_schema_data(interest_representative["financialData"]["closedYear"])
+        closed_year = interest_representative["financialData"]["closedYear"]
+        if "costs" in closed_year:
+            TransparencyRegisterExtractor.remove_xml_schema_data(
+                closed_year["costs"])
+            currency = closed_year["costs"]["@currency"]
+            closed_year["costs"]["currency"] = currency
+            closed_year["costs"].pop("@currency", None)
+
+        TransparencyRegisterExtractor.remove_xml_schema_data(interest_representative["financialData"]["currentYear"])
+
+        if 'clients' in closed_year:
+            for client in closed_year['clients']['client']:
+                if 'revenue' in client:
+                    TransparencyRegisterExtractor.remove_xml_schema_data(client['revenue'])
