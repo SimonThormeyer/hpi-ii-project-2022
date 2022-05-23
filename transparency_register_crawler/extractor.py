@@ -4,6 +4,7 @@ from shutil import copyfileobj
 from typing import List, Dict, Any
 from urllib.request import Request, urlopen
 from pathlib import Path
+from nested_lookup import nested_alter, nested_delete
 
 import xmltodict
 
@@ -86,12 +87,12 @@ class TransparencyRegisterExtractor:
 
     def parse_organizations(self) -> List[Organization]:
         organizations_dict = self.xml_to_dict("organization")
+        # organizations_dict = TransparencyRegisterExtractor.cast_datatypes_for_real(organizations_dict)
         organizations = []
-        for interestRepresentative in organizations_dict['ListOfIRPublicDetail']["resultList"][
-            'interestRepresentative']:
-            TransparencyRegisterExtractor.unused_data(interestRepresentative)
-            TransparencyRegisterExtractor.cast_datatypes(interestRepresentative)
-
+        for interestRepresentative in tqdm(organizations_dict['ListOfIRPublicDetail']["resultList"][
+            'interestRepresentative'], total=len(organizations_dict['ListOfIRPublicDetail']["resultList"][
+            'interestRepresentative'])):
+            TransparencyRegisterExtractor.cast_datatypes_for_real(interestRepresentative)
             org = Organization(**interestRepresentative)
             organizations.append(org)
         return organizations
@@ -129,29 +130,14 @@ class TransparencyRegisterExtractor:
                 closed_year['grants']["grant"]["amount"]["absoluteCost"])
             closed_year['grants'] = closed_year['grants']["grant"]
 
-        if 'clients' in closed_year:
-            closed_year['clients'] = closed_year['clients']['client']
+    @staticmethod
+    def decimal_string_to_int(value: str):
+        if type(value) == str:
+            return int(float(value))
+        return value
 
     @staticmethod
-    def remove_xml_schema_data(data: dict):
-        data.pop("@xmlns:xsi", None)
-        data.pop("@xsi:type", None)
-
-    @staticmethod
-    def unused_data(interest_representative):
-        TransparencyRegisterExtractor.remove_xml_schema_data(interest_representative["structure"])
-        TransparencyRegisterExtractor.remove_xml_schema_data(interest_representative["financialData"]["closedYear"])
-        closed_year = interest_representative["financialData"]["closedYear"]
-        if "costs" in closed_year:
-            TransparencyRegisterExtractor.remove_xml_schema_data(
-                closed_year["costs"])
-            currency = closed_year["costs"]["@currency"]
-            closed_year["costs"]["currency"] = currency
-            closed_year["costs"].pop("@currency", None)
-
-        TransparencyRegisterExtractor.remove_xml_schema_data(interest_representative["financialData"]["currentYear"])
-
-        if 'clients' in closed_year:
-            for client in closed_year['clients']['client']:
-                if 'revenue' in client:
-                    TransparencyRegisterExtractor.remove_xml_schema_data(client['revenue'])
+    def string_to_type(value: str, t: Type):
+        if type(value) == str:
+            return t(value)
+        return value

@@ -6,7 +6,7 @@ message Organization {
   string identificationCode = 1;
   string registrationDate = 2;
   string lastUpdateDate = 3;
-  string name = 4;
+  OrganizationName name = 4;
   string acronym = 5;
   string entityForm = 6;
   string webSiteURL = 7;
@@ -25,6 +25,9 @@ message Organization {
   Structure structure = 20;
   string interestRepresented = 21;
   FinancialData financialData = 22;
+}
+message OrganizationName {
+  string originalName = 1;
 }
 message Office {
     string address = 1;
