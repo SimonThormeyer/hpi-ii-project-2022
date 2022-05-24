@@ -110,6 +110,8 @@ class TransparencyRegisterExtractor:
                                           lambda value: TransparencyRegisterExtractor.string_to_type(value, int), in_place=True)
         nested_alter(organizations_dict, "members25Percent",
                      lambda value: TransparencyRegisterExtractor.string_to_type(value, int), in_place=True)
+        nested_alter(organizations_dict, "members10Percent",
+                     lambda value: TransparencyRegisterExtractor.string_to_type(value, int), in_place=True)
         nested_alter(organizations_dict, "newOrganisation",
                                           lambda value: TransparencyRegisterExtractor.string_to_type(value, bool), in_place=True)
         nested_alter(organizations_dict, "absoluteCost",
@@ -119,7 +121,7 @@ class TransparencyRegisterExtractor:
         nested_alter(organizations_dict, "clients", TransparencyRegisterExtractor.forward_list_layer, in_place=True)
 
         nested_alter(organizations_dict, "grants",
-                                          TransparencyRegisterExtractor.forward_dict_layer, in_place=True)
+                                          TransparencyRegisterExtractor.forward_list_layer, in_place=True)
 
         nested_alter(organizations_dict, "min",
                                           lambda value: TransparencyRegisterExtractor.string_to_type(value, float), in_place=True)
@@ -131,7 +133,11 @@ class TransparencyRegisterExtractor:
         nested_alter(organizations_dict, "totalAnnualRevenue",
                      lambda value: TransparencyRegisterExtractor.rename_child_key(value, "@currency", "currency"),
                      in_place=True)
-
+        nested_alter(organizations_dict, "fundingSources", TransparencyRegisterExtractor.forward_list_layer, in_place=True)
+        nested_alter(organizations_dict, "contributions", TransparencyRegisterExtractor.forward_list_layer,
+                     in_place=True)
+        nested_alter(organizations_dict, "intermediaries", TransparencyRegisterExtractor.forward_list_layer,
+                     in_place=True)
         nested_delete(organizations_dict, "@xmlns:xsi", in_place=True)
         nested_delete(organizations_dict, "@xsi:type", in_place=True)
 

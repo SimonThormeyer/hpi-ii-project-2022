@@ -28,13 +28,14 @@ message Organization {
 }
 message OrganizationName {
   string originalName = 1;
+  optional string nameInLatinAlphabet=2;
 }
 message Office {
-    string address = 1;
-    string postCode = 2;
-    string city = 3;
-    string country = 4;
-    Phone phone = 5;
+  string address = 1;
+  string postCode = 2;
+  string city = 3;
+  string country = 4;
+  Phone phone = 5;
 }
 
 message Phone {
@@ -50,6 +51,7 @@ message MemberInfo {
   optional int32 members50Percent = 5;
   optional int32 members25Percent = 6;
   optional int32 members75Percent = 7;
+  optional int32 members10Percent = 8;
 }
 
 message Structure {
@@ -59,27 +61,42 @@ message Structure {
 
 message FinancialData {
   bool newOrganisation = 1;
-  ClosedYear closedYear = 2;
-  CurrentYear currentYear = 3;
+  Year closedYear = 2;
+  Year currentYear = 3;
   optional string complementaryInformation = 4;
 }
 
-message ClosedYear {
-  string startDate = 1;
-  string endDate = 2;
-  string intermediaries = 3;
+message Year {
+  optional string startDate = 1;
+  optional string endDate = 2;
+  repeated Intermediary intermediaries = 3;
   optional Costs costs = 4;
-  Grants grants = 5;
+  repeated Grant grants = 5;
   repeated Client clients = 6;
   optional Costs totalAnnualRevenue = 7;
+  repeated FundingSource fundingSources = 8;
+  repeated Contribution contributions = 9 ;
+  optional Amount totalBudget = 10;
+}
+message Intermediary {
+  string name = 1;
+  optional RangeWrapper representationCosts = 2;
+}
+message Contribution {
+  string name = 1;
+  Amount amount = 2;
+}
+
+message FundingSource {
+  string source = 1;
 }
 
 message Client {
   string name = 1;
-  optional Revenue revenue = 2;
+  optional RangeWrapper revenue = 2;
   optional string proposal = 3;
 }
-message Revenue {
+message RangeWrapper {
   Range range = 1;
 }
 message Costs {
@@ -92,16 +109,11 @@ message Range {
   optional double max = 2;
 }
 
-message Grants {
+message Grant {
   string source = 1;
   Amount amount = 2;
 }
 
 message Amount {
   double absoluteCost = 1;
-}
-
-message CurrentYear {
-  string intermediaries = 1;
-  repeated Client clients = 2;
 }
