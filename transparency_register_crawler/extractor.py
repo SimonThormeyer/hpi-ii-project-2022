@@ -17,7 +17,6 @@ from transparency_register_crawler.person_producer import TransRegPersonProducer
 log = logging.getLogger(__name__)
 
 
-
 class TransparencyRegisterExtractor:
     DOWNLOAD_URL = "http://ec.europa.eu/transparencyregister/public/consultation/statistics.do?action=getLobbyistsXml&fileType="
     PERSON_FILE_TYPE = "ACCREDITED_PERSONS"
@@ -92,8 +91,9 @@ class TransparencyRegisterExtractor:
         # organizations_dict = TransparencyRegisterExtractor.cast_datatypes_for_real(organizations_dict)
         organizations = []
         for interestRepresentative in tqdm(organizations_dict['ListOfIRPublicDetail']["resultList"][
-            'interestRepresentative'], total=len(organizations_dict['ListOfIRPublicDetail']["resultList"][
-            'interestRepresentative'])):
+                                               'interestRepresentative'],
+                                           total=len(organizations_dict['ListOfIRPublicDetail']["resultList"][
+                                                         'interestRepresentative'])):
             TransparencyRegisterExtractor.cast_datatypes_for_real(interestRepresentative)
             org = Organization(**interestRepresentative)
             organizations.append(org)
@@ -101,39 +101,42 @@ class TransparencyRegisterExtractor:
 
     @staticmethod
     def cast_datatypes_for_real(organizations_dict):
-        nested_alter(organizations_dict, "membersFTE", TransparencyRegisterExtractor.decimal_string_to_int, in_place=True)
+        nested_alter(organizations_dict, "membersFTE", TransparencyRegisterExtractor.decimal_string_to_int,
+                     in_place=True)
         nested_alter(organizations_dict, "members100Percent",
-                                          lambda value: TransparencyRegisterExtractor.string_to_type(value, int), in_place=True)
+                     lambda value: TransparencyRegisterExtractor.string_to_type(value, int), in_place=True)
         nested_alter(organizations_dict, "members75Percent",
                      lambda value: TransparencyRegisterExtractor.string_to_type(value, int), in_place=True)
         nested_alter(organizations_dict, "members50Percent",
-                                          lambda value: TransparencyRegisterExtractor.string_to_type(value, int), in_place=True)
+                     lambda value: TransparencyRegisterExtractor.string_to_type(value, int), in_place=True)
         nested_alter(organizations_dict, "members25Percent",
                      lambda value: TransparencyRegisterExtractor.string_to_type(value, int), in_place=True)
         nested_alter(organizations_dict, "members10Percent",
                      lambda value: TransparencyRegisterExtractor.string_to_type(value, int), in_place=True)
         nested_alter(organizations_dict, "newOrganisation",
-                                          lambda value: TransparencyRegisterExtractor.string_to_type(value, bool), in_place=True)
+                     lambda value: TransparencyRegisterExtractor.string_to_type(value, bool), in_place=True)
         nested_alter(organizations_dict, "absoluteCost",
-                                          lambda value: TransparencyRegisterExtractor.string_to_type(value, float), in_place=True)
+                     lambda value: TransparencyRegisterExtractor.string_to_type(value, float), in_place=True)
         nested_alter(organizations_dict, "members", TransparencyRegisterExtractor.decimal_string_to_int, in_place=True)
 
         nested_alter(organizations_dict, "clients", TransparencyRegisterExtractor.forward_list_layer, in_place=True)
 
         nested_alter(organizations_dict, "grants",
-                                          TransparencyRegisterExtractor.forward_list_layer, in_place=True)
+                     TransparencyRegisterExtractor.forward_list_layer, in_place=True)
 
         nested_alter(organizations_dict, "min",
-                                          lambda value: TransparencyRegisterExtractor.string_to_type(value, float), in_place=True)
+                     lambda value: TransparencyRegisterExtractor.string_to_type(value, float), in_place=True)
         nested_alter(organizations_dict, "max",
-                                          lambda value: TransparencyRegisterExtractor.string_to_type(value, float), in_place=True)
+                     lambda value: TransparencyRegisterExtractor.string_to_type(value, float), in_place=True)
 
         nested_alter(organizations_dict, "costs",
-                     lambda value: TransparencyRegisterExtractor.rename_child_key(value, "@currency", "currency"), in_place=True)
+                     lambda value: TransparencyRegisterExtractor.rename_child_key(value, "@currency", "currency"),
+                     in_place=True)
         nested_alter(organizations_dict, "totalAnnualRevenue",
                      lambda value: TransparencyRegisterExtractor.rename_child_key(value, "@currency", "currency"),
                      in_place=True)
-        nested_alter(organizations_dict, "fundingSources", TransparencyRegisterExtractor.forward_list_layer, in_place=True)
+        nested_alter(organizations_dict, "fundingSources", TransparencyRegisterExtractor.forward_list_layer,
+                     in_place=True)
         nested_alter(organizations_dict, "contributions", TransparencyRegisterExtractor.forward_list_layer,
                      in_place=True)
         nested_alter(organizations_dict, "intermediaries", TransparencyRegisterExtractor.forward_list_layer,
