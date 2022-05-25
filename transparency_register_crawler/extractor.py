@@ -1,7 +1,8 @@
 import logging
 import os
+import re
 from shutil import copyfileobj
-from typing import List, Dict, Any, Type
+from typing import List, Type
 from urllib.request import Request, urlopen
 from pathlib import Path
 from nested_lookup import nested_alter, nested_delete
@@ -46,6 +47,7 @@ class TransparencyRegisterExtractor:
     def download_data_set(url, filename):
         # Translate url into a filename
         file_path = Path(TransparencyRegisterExtractor.RAW_DATA_PATH) / filename
+        os.makedirs(os.path.dirname(file_path), exist_ok=True)
         if not os.path.exists(file_path):
             log.info(f"Starting download of {url} to {file_path}")
             header = {'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) '}
@@ -92,15 +94,14 @@ class TransparencyRegisterExtractor:
         organizations = []
         for interestRepresentative in tqdm(organizations_dict['ListOfIRPublicDetail']["resultList"][
                                                'interestRepresentative'],
-                                           total=len(organizations_dict['ListOfIRPublicDetail']["resultList"][
-                                                         'interestRepresentative'])):
-            TransparencyRegisterExtractor.cast_datatypes_for_real(interestRepresentative)
+                                           desc='Parsing organizations'):
+            TransparencyRegisterExtractor.cast_datatypes(interestRepresentative)
             org = Organization(**interestRepresentative)
             organizations.append(org)
         return organizations
 
     @staticmethod
-    def cast_datatypes_for_real(organizations_dict):
+    def cast_datatypes(organizations_dict):
         nested_alter(organizations_dict, "membersFTE", TransparencyRegisterExtractor.decimal_string_to_int,
                      in_place=True)
         nested_alter(organizations_dict, "members100Percent",
@@ -141,8 +142,26 @@ class TransparencyRegisterExtractor:
                      in_place=True)
         nested_alter(organizations_dict, "intermediaries", TransparencyRegisterExtractor.forward_list_layer,
                      in_place=True)
+        nested_alter(organizations_dict, "interests",
+                     TransparencyRegisterExtractor.forward_list_layer,
+                     in_place=True)
+        nested_alter(organizations_dict, "levelsOfInterest",
+                     TransparencyRegisterExtractor.forward_list_layer,
+                     in_place=True)
+
         nested_delete(organizations_dict, "@xmlns:xsi", in_place=True)
         nested_delete(organizations_dict, "@xsi:type", in_place=True)
+
+        # string lists
+        nested_alter(organizations_dict, "EULegislativeProposals",
+                     TransparencyRegisterExtractor.split_string_by_semicolon,
+                     in_place=True)
+        nested_alter(organizations_dict, "communicationActivities",
+                     TransparencyRegisterExtractor.split_string_by_newline,
+                     in_place=True)
+        nested_alter(organizations_dict, "organisationMembers",
+                     TransparencyRegisterExtractor.split_string_by_newline,
+                     in_place=True)
 
     @staticmethod
     def rename_child_key(value: dict, old_key: str, new_key: str):
@@ -180,3 +199,11 @@ class TransparencyRegisterExtractor:
         if type(value) == str:
             return t(value)
         return value
+
+    @staticmethod
+    def split_string_by_newline(value: str):
+        return value.split(sep="\r\n")
+
+    @staticmethod
+    def split_string_by_semicolon(value: str):
+        return re.split(r";\s+", value)

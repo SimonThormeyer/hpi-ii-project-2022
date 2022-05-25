@@ -14,14 +14,14 @@ message Organization {
   Office headOffice = 9;
   Office EUOffice = 10;
   string goals = 11;
-  repeated string levelsOfInterest = 12;
+  repeated LevelOfInterest levelsOfInterest = 12;
   repeated string EULegislativeProposals = 13;
   string EUSupportedForumsAndPlatforms = 14;
   repeated string communicationActivities = 15;
   string interOrUnofficalGroupings = 16;
   MemberInfo members = 17;
   string EPAccreditedNumber = 18;
-  repeated string interests = 19;
+  repeated Interest interests = 19;
   Structure structure = 20;
   string interestRepresented = 21;
   FinancialData financialData = 22;
@@ -116,4 +116,12 @@ message Grant {
 
 message Amount {
   double absoluteCost = 1;
+}
+
+message Interest {
+  string name = 1;
+}
+
+message LevelOfInterest {
+  string levelOfInterest = 1;
 }
