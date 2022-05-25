@@ -135,6 +135,13 @@ Options:
   --help                          Show this message and exit.
 ```
 
+### Transparency Register Crawler
+You can start the crawler with the command below:
+```shell
+poetry run python transparency_register_crawler/main.py
+```
+
+
 ## Query data
 
 ### Kowl
