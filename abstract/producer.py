@@ -1,15 +1,13 @@
 import logging
 from abc import ABC, abstractmethod
 from typing import TypeVar
-
-log = logging.getLogger(__name__)
-
 from confluent_kafka import SerializingProducer
 from confluent_kafka.schema_registry import SchemaRegistryClient
 from confluent_kafka.schema_registry.protobuf import ProtobufSerializer
 from confluent_kafka.serialization import StringSerializer
 
 T = TypeVar("T")
+log = logging.getLogger(__name__)
 
 
 class Producer(ABC):
@@ -39,7 +37,8 @@ class Producer(ABC):
 
     def produce_to_topic(self, message: T):
         self.producer.produce(
-            topic=self.topic, partition=-1, key=self.get_key(message), value=message, on_delivery=self.delivery_report
+            topic=self.topic, partition=-1, key=self.get_key(message), value=message,
+            on_delivery=self.delivery_report
         )
 
         # It is a naive approach to flush after each produce this can be optimised
