@@ -141,6 +141,12 @@ You can start the crawler with the command below:
 poetry run python transparency_register_crawler/main.py
 ```
 
+The crawler produces two more topics in kafka containing the information of the transparency register.
+The topics are:
+1. transparency-organization-events
+2. transparency-person-events
+
+Persons and organizations can be linked via the organizationIdentificationCode.
 
 ## Query data
 
