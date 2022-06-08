@@ -126,6 +126,7 @@ services:
       CONNECT_PLUGIN_PATH: /usr/share/java,/usr/share/confluent-hub-components,/data/connect-jars
     volumes:
       - ./connect/elastic-sink.json:/connect/elastic-sink.json
+      - ./connect/neo4j-sink.json:/connect/neo4j-sink.json
     command:
       - bash
       - -c
@@ -133,6 +134,7 @@ services:
         echo "Installing Connector"
         confluent-hub install confluentinc/kafka-connect-elasticsearch:11.1.10 --no-prompt
         confluent-hub install confluentinc/kafka-connect-protobuf-converter:7.1.0 --no-prompt
+        confluent-hub install neo4j/kafka-connect-neo4j:latest --no-prompt
         #
         echo "Launching Kafka Connect worker"
         /etc/confluent/docker/run &
@@ -149,3 +151,18 @@ services:
     ports:
       - "9200:9200"
       - "9300:9300"
+
+  neo4j:
+    image: neo4j:latest
+    container_name: neo4j
+    ports:
+      - "7474:7474"
+      - "7687:7687"
+    environment:
+      NEO4J_AUTH: neo4j/connect
+      NEO4J_dbms_memory_heap_max__size: 8G
+      NEO4J_ACCEPT_LICENSE_AGREEMENT: 'yes'
+      NEO4J_dbms_directories_import: "/"
+      NEO4JLABS_PLUGINS: '["apoc"]'
+    volumes:
+      - ./neo4j-init-files:/var/lib/neo4j/conf
