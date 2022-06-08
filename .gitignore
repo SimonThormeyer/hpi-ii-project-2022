@@ -1,5 +1,5 @@
 venv/
-build/gen/bakdata/corporate/v1/*_pb2.py
+build
 .idea
 __pycache__/
 
