@@ -1,0 +1,20 @@
+
+syntax = "proto3";
+
+package bakdata.tr_rb_organization.proto;
+
+message IntegratedOrganization {
+    string rb_reference_id = 1;
+    string tr_identificationCode = 2;
+    string tr_registrationDate = 3;
+    string rb_registrationDate = 4;
+    string name = 5;
+    repeated string interests = 6;
+    repeated Grant grants = 7;
+    string rb_information = 8;
+}
+
+message Grant {
+  string source = 1;
+  double amount = 2;
+}

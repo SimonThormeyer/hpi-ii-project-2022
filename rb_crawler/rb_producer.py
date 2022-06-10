@@ -2,6 +2,7 @@ from abstract.producer import Producer
 from build.gen.bakdata.corporate.v1 import corporate_pb2
 from build.gen.bakdata.corporate.v1.corporate_pb2 import Corporate
 
+
 class RbProducer(Producer):
     TOPIC = "corporate-events"
 
