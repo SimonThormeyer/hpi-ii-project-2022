@@ -6,6 +6,7 @@ from confluent_kafka.schema_registry import SchemaRegistryClient
 from confluent_kafka.schema_registry.protobuf import ProtobufSerializer
 from confluent_kafka.serialization import StringSerializer
 
+
 T = TypeVar("T")
 log = logging.getLogger(__name__)
 

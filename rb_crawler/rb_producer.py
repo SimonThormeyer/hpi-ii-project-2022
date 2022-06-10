@@ -1,6 +1,6 @@
 from abstract.producer import Producer
 from build.gen.bakdata.corporate.v1 import corporate_pb2
-from build.gen.bakdata.corporate.v1.corporate_pb2 import Corporate
+from build.gen.bakdata.corporate.v1.corporate_pb2 import Corporate  # type: ignore
 
 
 class RbProducer(Producer):
