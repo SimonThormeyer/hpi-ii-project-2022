@@ -10,4 +10,4 @@ class TrRbProducer(Producer):
         super().__init__(TrRbProducer.TOPIC, IntegratedOrganization)
 
     def get_key(self, message: IntegratedOrganization):
-        return message.rb_reference_id
+        return message.id

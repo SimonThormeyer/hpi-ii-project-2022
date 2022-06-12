@@ -1,10 +1,13 @@
+import hashlib
+import logging
+import os
 import re
 from build.gen.bakdata.corporate.v1.corporate_pb2 import Corporate  # type: ignore
 from tr_rb_integration.tr_rb_producer import TrRbProducer
 from elasticsearch import Elasticsearch
 
 
-def run():
+def integrate_rb_corporates():
     producer = TrRbProducer()
     es = Elasticsearch("http://localhost:9200")
     # load corporate pages
@@ -14,46 +17,61 @@ def run():
             "default_field": "event_type"
         }
     },
-    "size": 10000}
-    rb_hits = es.search(index='corporate-events', body=rb_body)['hits']['hits']
+        "size": 10000
+    }
+    result = es.search(index='corporate-dump', body=rb_body, scroll="200m")
+    rb_hits = result['hits']['hits']
+    scroll_id = result["_scroll_id"]
 
-    for rb_hit in rb_hits:
-        corporate_data = rb_hit['_source']
-        # parse corporate
-        corporate = Corporate(**corporate_data)
-        company_name = re.findall(r"(.*?:\s)??(.*?),", string=corporate.information)[0][1]
-        tr_body = {"query": {
-            "query_string": {
-                "query": company_name,
-                "default_field": "name.originalName"
-            }
-        },
-            "min_score": 10
-        }
+    while rb_hits:
+        for rb_hit in rb_hits:
+            corporate_data = rb_hit['_source']
+            # parse corporate
+            corporate = Corporate(**corporate_data)
+            regex_result = re.findall(r"(.*?:\s)?(.*?)(,|(\s\())", string=corporate.information)
+            company_name = regex_result[0][1]
 
-        tr_body = {
-            "query": {
-                "fuzzy": {
-                    "name.originalName": {
-                        "value": "SAP",
-                        "fuzziness": "AUTO",
-                        "max_expansions": 50,
-                        "prefix_length": 0,
-                        "transpositions": True,
-                        "rewrite": "constant_score"
-                    }
-                }
-            }
-        }
+            i_org = IntegratedOrganization()
+            i_org.rb_reference_id = str(corporate.rb_id)
+            i_org.rb_registrationDate = corporate.event_date
+            i_org.name = company_name
+            i_org.rb_information = corporate.information
+            i_org.id = hashlib.sha1(
+                f"{corporate.rb_id}{corporate.event_date}{company_name}{corporate.information}".encode(
+                    'utf-8')).hexdigest()
+            producer.produce_to_topic(i_org)
 
-        tr_hits = es.search(index='transparency-organization-events', body=tr_body, )['hits']['hits']
-        if tr_hits:
-            hit = tr_hits[0]
+        result = es.scroll(scroll_id=scroll_id, scroll='1s', )['hits']['hits']
 
-    # for each message in page
-    #   find integration from elastic
-    #   if found create IntegrationOrganization and produce
-    # producer.produce_to_topic()
+
+def integrate_tr_organizations():
+    first_event_received = False
+    consumer = TrOrgConsumer()
+    producer = TrRbProducer()
+    while True:
+        message = consumer.consumer.poll(timeout=60)
+        if message is None:
+            break
+        organization: Organization = message.value()
+
+        i_org = IntegratedOrganization()
+        i_org.tr_identificationCode = organization.identificationCode
+        i_org.tr_registrationDate = organization.registrationDate
+        i_org.name = organization.name.originalName
+        for interest in organization.interests:
+            i_org.interests.append(interest.name)
+        for grant in organization.financialData.closedYear.grants:
+            i_org.grants.append(Grant(amount=grant.amount.absoluteCost, source=grant.source))
+        i_org.id = hashlib.sha1(
+            f"{i_org.tr_identificationCode}{i_org.tr_registrationDate}{i_org.name}{i_org.interests}{i_org.grants}".encode(
+                'utf-8')).hexdigest()
+
+        producer.produce_to_topic(i_org)
+
+
+def run():
+    # integrate_tr_organizations()
+    integrate_rb_corporates()
 
 
 if __name__ == '__main__':

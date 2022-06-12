@@ -71,8 +71,8 @@ class TransparencyRegisterExtractor:
         persons: List[Person] = self.parse_persons()
         organizations: List[Organization] = self.parse_organizations()
 
-        for person in persons:
-            self.person_producer.produce_to_topic(person)
+        #for person in persons:
+        #    self.person_producer.produce_to_topic(person)
 
         for organization in organizations:
             self.organization_producer.produce_to_topic(organization)
