@@ -148,6 +148,17 @@ The topics are:
 
 Persons and organizations can be linked via the organizationIdentificationCode.
 
+
+### Produce organizations / corporates to a mutual schema
+We assume an already crawled dataset of corporate events that is sinked to elastic search index "corporate-events".
+
+Since we can download the full transparency register dataset, the corresponding events are produced freshly from a consumer.
+
+To run the integration execute "./tr_rb_integration/main.py" to start the consumer and then start the Transparency Register Crawler.
+The corporate events will be read from elastic search.
+
+The integrated events will be produced to kafka topic "integrated-organization-events".
+
 ## Query data
 
 ### Kowl

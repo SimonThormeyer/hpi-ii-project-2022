@@ -27,7 +27,7 @@ def integrate_rb_corporates():
     },
         "size": 10000
     }
-    result = es.search(index='corporate-dump', body=rb_body, scroll="200m")
+    result = es.search(index='corporate-events', body=rb_body, scroll="200m")
     rb_hits = result['hits']['hits']
     scroll_id = result["_scroll_id"]
 
