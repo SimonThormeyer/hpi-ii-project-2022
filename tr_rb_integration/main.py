@@ -78,7 +78,7 @@ def integrate_tr_organizations():
 
 
 def run():
-    # integrate_tr_organizations()
+    integrate_tr_organizations()
     integrate_rb_corporates()
 
 
