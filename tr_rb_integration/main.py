@@ -49,11 +49,10 @@ def integrate_rb_corporates():
                     'utf-8')).hexdigest()
             producer.produce_to_topic(i_org)
 
-        result = es.scroll(scroll_id=scroll_id, scroll='1s', )['hits']['hits']
+        rb_hits = es.scroll(scroll_id=scroll_id, scroll='1s')['hits']['hits']
 
 
 def integrate_tr_organizations():
-    first_event_received = False
     consumer = TrOrgConsumer()
     producer = TrRbProducer()
     while True:
