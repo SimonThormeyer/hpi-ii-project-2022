@@ -3,8 +3,16 @@ import logging
 import os
 import re
 from build.gen.bakdata.corporate.v1.corporate_pb2 import Corporate  # type: ignore
+from build.gen.bakdata.organization.v1.organization_pb2 import Organization  # type: ignore
+from build.gen.bakdata.tr_rb_integration.v1.tr_rb_integration_pb2 import Grant, IntegratedOrganization  # type: ignore
+from tr_rb_integration.tr_organizations_consumer import TrOrgConsumer
 from tr_rb_integration.tr_rb_producer import TrRbProducer
 from elasticsearch import Elasticsearch
+
+logging.basicConfig(
+    level=os.environ.get("LOGLEVEL", "INFO"), format="%(asctime)s | %(name)s | %(levelname)s | %(message)s"
+)
+log = logging.getLogger(__name__)
 
 
 def integrate_rb_corporates():
