@@ -27,7 +27,7 @@ def integrate_rb_corporates():
     },
         "size": 10000
     }
-    result = es.search(index='corporate-events', body=rb_body, scroll="200m")
+    result = es.search(index='corporate-dump', body=rb_body, scroll="200m")
     rb_hits = result['hits']['hits']
     scroll_id = result["_scroll_id"]
 
@@ -36,7 +36,7 @@ def integrate_rb_corporates():
             corporate_data = rb_hit['_source']
             # parse corporate
             corporate = Corporate(**corporate_data)
-            regex_result = re.findall(r"(.*?:\s)?(.*?)(,|(\s\())", string=corporate.information)
+            regex_result = re.findall(r"(.*?:\s)??(.*?)(,|(\s\())", string=corporate.information)
             company_name = regex_result[0][1]
 
             i_org = IntegratedOrganization()
@@ -78,7 +78,7 @@ def integrate_tr_organizations():
 
 def run():
     integrate_tr_organizations()
-    integrate_rb_corporates()
+    #integrate_rb_corporates()
 
 
 if __name__ == '__main__':
