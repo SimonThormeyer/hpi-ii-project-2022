@@ -23,7 +23,7 @@ def run():
     },
         "size": 10000
     }
-    result = es.search(index="integrated-organization-events-4", body=rb_body, scroll="200m")
+    result = es.search(index="new-integrated", body=rb_body, scroll="200m")
     hits = result['hits']['hits']
     scroll_id = result["_scroll_id"]
 
@@ -32,13 +32,14 @@ def run():
             corporate_data = hit['_source']
             # parse corporate
             dedup_org = IntegratedOrganization(**corporate_data)
-            dedup_org.name = dedup_org.name.split("Sitz")[0]
             dedup_org_id = re.sub(r'\W+', '', dedup_org.name).lower()
             # duplicates will be removed via elastic search UPSERT
             dedup_org.id = dedup_org_id
             producer.produce_to_topic(dedup_org)
 
         hits = es.scroll(scroll_id=scroll_id, scroll='1s')['hits']['hits']
+
+    producer.finish()
 
 
 if __name__ == '__main__':

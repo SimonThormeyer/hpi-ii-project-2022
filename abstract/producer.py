@@ -1,5 +1,7 @@
+import datetime
 import logging
 from abc import ABC, abstractmethod
+from datetime import timedelta, datetime
 from typing import TypeVar
 from confluent_kafka import SerializingProducer
 from confluent_kafka.schema_registry import SchemaRegistryClient
@@ -16,6 +18,10 @@ class Producer(ABC):
 
     def __init__(self, topic, schema):
         self.topic = topic
+        self.buffer_size = buffer_size
+        self.counter = 0
+        self.timeout = timedelta(seconds=3)
+        self.last_event_time = datetime.now()
         schema_registry_conf = {"url": Producer.SCHEMA_REGISTRY_URL}
         schema_registry_client = SchemaRegistryClient(schema_registry_conf)
 
@@ -40,9 +46,16 @@ class Producer(ABC):
             topic=self.topic, partition=-1, key=self.get_key(message), value=message,
             on_delivery=self.delivery_report
         )
-
+        self.counter += 1
+        self.last_event_time = datetime.now()
         # It is a naive approach to flush after each produce this can be optimised
-        self.producer.poll()
+        if self.counter == self.buffer_size or datetime.now() - self.last_event_time >= self.timeout:
+            self.counter = 0
+            log.info("Flushing buffer.")
+            self.producer.flush()
+
+    def finish(self):
+        self.producer.flush()
 
     @staticmethod
     def delivery_report(err, msg):

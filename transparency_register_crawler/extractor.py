@@ -77,6 +77,8 @@ class TransparencyRegisterExtractor:
         for organization in organizations:
             self.organization_producer.produce_to_topic(organization)
 
+        self.organization_producer.finish()
+
     @staticmethod
     def xml_to_dict(key: str):
         file_name = TransparencyRegisterExtractor.dataset_mapping[key]["file_name"]

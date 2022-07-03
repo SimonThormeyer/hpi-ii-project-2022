@@ -14,9 +14,10 @@ logging.basicConfig(
 )
 log = logging.getLogger(__name__)
 
+producer = TrRbProducer()
+
 
 def integrate_rb_corporates():
-    producer = TrRbProducer()
     es = Elasticsearch("http://localhost:9200")
     # load corporate pages
     rb_body = {"query": {
@@ -36,9 +37,9 @@ def integrate_rb_corporates():
             corporate_data = rb_hit['_source']
             # parse corporate
             corporate = Corporate(**corporate_data)
-            regex_result = re.findall(r"(.*?:\s)??(.*?)(,|(\s\())", string=corporate.information)
-            company_name = regex_result[0][1]
-
+            regex_result = re.findall(r"(([A-Z]+\s[0-9]+?.*?:\s)?)?(.*?)(,|(\s\())", string=corporate.information)
+            company_name = regex_result[0][2]
+            company_name = company_name.split("Sitz")[0]
             i_org = IntegratedOrganization()
             i_org.rb_reference_id = str(corporate.rb_id)
             i_org.rb_registrationDate = corporate.event_date
@@ -51,10 +52,11 @@ def integrate_rb_corporates():
 
         rb_hits = es.scroll(scroll_id=scroll_id, scroll='1s')['hits']['hits']
 
+    producer.finish()
+
 
 def integrate_tr_organizations():
     consumer = TrOrgConsumer()
-    producer = TrRbProducer()
     while True:
         message = consumer.consumer.poll(timeout=60)
         if message is None:
@@ -74,6 +76,8 @@ def integrate_tr_organizations():
                 'utf-8')).hexdigest()
 
         producer.produce_to_topic(i_org)
+
+    producer.finish()
 
 
 def run():

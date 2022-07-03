@@ -4,7 +4,7 @@ from build.gen.bakdata.tr_rb_integration.v1.tr_rb_integration_pb2 import Integra
 
 
 class DedupProducer(Producer):
-    TOPIC = "dedup-organization-events-2"
+    TOPIC = "dedup"
 
     def __init__(self):
         super().__init__(DedupProducer.TOPIC, IntegratedOrganization)
