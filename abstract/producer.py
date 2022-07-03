@@ -16,7 +16,7 @@ class Producer(ABC):
     BOOTSTRAP_SERVER: str = "localhost:29092"
     SCHEMA_REGISTRY_URL: str = "http://localhost:8081"
 
-    def __init__(self, topic, schema):
+    def __init__(self, topic, schema, buffer_size=100):
         self.topic = topic
         self.buffer_size = buffer_size
         self.counter = 0
