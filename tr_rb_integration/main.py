@@ -40,6 +40,7 @@ def integrate_rb_corporates():
             regex_result = re.findall(r"(([A-Z]+\s?[0-9]+?.*?:\s)?)?(.*?)(,|(\s\())", string=corporate.information)
             company_name = regex_result[0][2]
             company_name = company_name.split("Sitz")[0]
+            company_name = basename(company_name)
             i_org = IntegratedOrganization()
             i_org.rb_reference_id = str(corporate.rb_id)
             i_org.rb_registrationDate = corporate.event_date
@@ -66,7 +67,7 @@ def integrate_tr_organizations():
         i_org = IntegratedOrganization()
         i_org.tr_identificationCode = organization.identificationCode
         i_org.tr_registrationDate = organization.registrationDate
-        i_org.name = organization.name.originalName
+        i_org.name = basename(organization.name.originalName)
         for interest in organization.interests:
             i_org.interests.append(interest.name)
         for grant in organization.financialData.closedYear.grants:
