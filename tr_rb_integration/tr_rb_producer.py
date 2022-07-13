@@ -4,7 +4,7 @@ from build.gen.bakdata.tr_rb_integration.v1.tr_rb_integration_pb2 import Integra
 
 
 class TrRbProducer(Producer):
-    TOPIC = "new-integrated"
+    TOPIC = "integrated-new"
 
     def __init__(self):
         super().__init__(TrRbProducer.TOPIC, IntegratedOrganization)

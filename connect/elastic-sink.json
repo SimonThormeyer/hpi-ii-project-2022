@@ -2,13 +2,14 @@
   "name": "elasticsearch-sink",
   "config": {
     "connector.class": "io.confluent.connect.elasticsearch.ElasticsearchSinkConnector",
-    "topics": "corporate-events,transparency-organization-events,transparency-person-events,new-integrated,dedup",
+    "topics": "corporate-events,transparency-organization-events,transparency-person-events,integrated-new,dedup-new",
     "input.data.format": "PROTOBUF",
     "connection.url": "http://elasticsearch:9200",
-    "type.name": "corporate-events,transparency-organization-events,transparency-person-events,new-integrated,dedup",
+    "type.name": "corporate-events,transparency-organization-events,transparency-person-events,integrated-new,dedup-new",
     "key.ignore": "false",
     "schema.ignore": "true",
     "tasks.max": "1",
-    "write.method": "UPSERT"
+    "write.method": "UPSERT",
+    "behavior.on.null.values": "DELETE"
   }
 }
