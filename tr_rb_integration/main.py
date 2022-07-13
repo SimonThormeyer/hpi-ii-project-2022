@@ -2,6 +2,9 @@ import hashlib
 import logging
 import os
 import re
+
+from cleanco import basename
+
 from build.gen.bakdata.corporate.v1.corporate_pb2 import Corporate  # type: ignore
 from build.gen.bakdata.organization.v1.organization_pb2 import Organization  # type: ignore
 from build.gen.bakdata.tr_rb_integration.v1.tr_rb_integration_pb2 import Grant, IntegratedOrganization  # type: ignore
