@@ -37,7 +37,7 @@ def integrate_rb_corporates():
             corporate_data = rb_hit['_source']
             # parse corporate
             corporate = Corporate(**corporate_data)
-            regex_result = re.findall(r"(([A-Z]+\s[0-9]+?.*?:\s)?)?(.*?)(,|(\s\())", string=corporate.information)
+            regex_result = re.findall(r"(([A-Z]+\s?[0-9]+?.*?:\s)?)?(.*?)(,|(\s\())", string=corporate.information)
             company_name = regex_result[0][2]
             company_name = company_name.split("Sitz")[0]
             i_org = IntegratedOrganization()
